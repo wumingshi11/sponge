@@ -1,9 +1,10 @@
 #include "socket.hh"
 #include "util.hh"
-
+#include "address.hh"
 #include <cstdlib>
 #include <iostream>
 
+#define LINEEND
 using namespace std;
 
 void get_URL(const string &host, const string &path) {
@@ -16,6 +17,23 @@ void get_URL(const string &host, const string &path) {
     // Then you'll need to print out everything the server sends back,
     // (not just one call to read() -- everything) until you reach
     // the "eof" (end of file).
+    TCPSocket target;
+    const string end = "\r\n";
+    target.connect(Address(host, "http"));
+    string tmp = "GET " + path + " HTTP/1.1" + end;
+    target.write(tmp);
+    tmp = "Host: " + host + end;
+    target.write(tmp);
+    tmp = "Connection: close" + end;
+    target.write(tmp);
+    target.write(end);
+    
+    do {
+        auto recv = target.read();
+        cout << recv; 
+    } while (!target.eof());
+    return;
+
 
     cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
     cerr << "Warning: get_URL() has not been implemented yet.\n";
