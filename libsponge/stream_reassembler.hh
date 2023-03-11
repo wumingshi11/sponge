@@ -5,15 +5,32 @@
 
 #include <cstdint>
 #include <string>
+#include <set>
+
 
 //! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
 //! possibly overlapping) into an in-order byte stream.
 class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
-
+    class substream {
+      public:
+        size_t index;
+        char c;
+        substream(const char cc, size_t i) : index(i),c(cc)  {};
+        bool operator< (const substream& rhs) const{
+          return index < rhs.index;
+        }
+        bool operator== (const substream& rhs) const{
+          return index == rhs.index;
+        }
+    };
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
+    size_t _unassembled_size{0}; //!< the unassembler number of bytes
+    size_t _next_index{0};
+    size_t _eof_index{UINT64_MAX};
+    std::set<substream> streams; //! save the unassembled substring
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
