@@ -17,8 +17,15 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
       abs_index = 1;
     } else {
       auto tmp = unwrap(seg.header().seqno, start, abs_index);
-      if (tmp > 0) abs_index = tmp;
-      else return;
+      if (tmp == 0) return;
+      if (tmp > abs_index) {
+        if (tmp - abs_index < _capacity) abs_index = tmp;
+        else return;
+      } else {
+        if (abs_index - tmp < _capacity) abs_index = tmp;
+        else return;
+      } 
+      
     }
     std::string data = seg.payload().copy();
     _reassembler.push_substring(data, abs_index - 1, seg.header().fin);

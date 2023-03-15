@@ -85,10 +85,6 @@ unsigned int TCPSender::consecutive_retransmissions() const { return _retransmis
 
 void TCPSender::send_empty_segment() {
     TCPHeader header;
-    int b = 1;
-    if (_stream.input_ended()) b = 2;
-    header.ackno = wrap(_stream.bytes_written() + b, _isn);
-    header.win = _stream.remaining_capacity();
     Buffer buffer{header.serialize()};
     TCPSegment seg;
     seg.parse(buffer);
