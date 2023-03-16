@@ -7,7 +7,7 @@
 
 #include <optional>
 #include <queue>
-
+#include <map>
 //! \brief A "network interface" that connects IP (the internet layer, or network layer)
 //! with Ethernet (the network access layer, or link layer).
 
@@ -40,6 +40,19 @@ class NetworkInterface {
     //! outbound queue of Ethernet frames that the NetworkInterface wants sent
     std::queue<EthernetFrame> _frames_out{};
 
+    struct ip2eth {
+      uint32_t last_send{0}; // last send time(ms)
+      uint32_t remain{0};  //how long since learn(ms)
+      EthernetAddress eth_addr{};
+    };
+
+    std::map<uint32_t, ip2eth> _ip2eths{};
+    std::map<uint32_t, std::queue<EthernetFrame>> _wait_send_EthenetFrame{};
+    bool _vaild_ip(uint32_t);
+    void _arp(uint32_t);
+
+    static const uint32_t ETH_TIMEOUT = 30 * 1000;
+    static const uint32_t AGAIN_ARP   =  5 * 1000;
   public:
     //! \brief Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer) addresses
     NetworkInterface(const EthernetAddress &ethernet_address, const Address &ip_address);
